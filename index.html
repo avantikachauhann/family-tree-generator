@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Tree Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .tree-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tree-node {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .tree-node img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+        }
+        .tree-connection {
+            width: 2px;
+            background-color: #000;
+            position: absolute;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        .button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button class="button" onclick="addMember('male')">Add Male</button>
+        <button class="button" onclick="addMember('female')">Add Female</button>
+        <button class="button" onclick="saveProgress()">Save Progress</button>
+        <button class="button" onclick="downloadTree()">Download Tree</button>
+    </div>
+
+    <div class="tree-container" id="treeContainer">
+        <!-- Family tree nodes will appear here -->
+    </div>
+
+    <script>
+        let treeData = [];
+
+        function addMember(gender) {
+            const container = document.getElementById('treeContainer');
+            const member = {
+                id: treeData.length + 1,
+                gender: gender
+            };
+            treeData.push(member);
+
+            const node = document.createElement('div');
+            node.className = 'tree-node';
+            node.innerHTML = `
+                <img src="${gender === 'male' ? 'https://via.placeholder.com/50/007bff/ffffff?text=B' : 'https://via.placeholder.com/50/ff69b4/ffffff?text=G'}" alt="${gender}">
+                <p>Member ${member.id}</p>
+            `;
+            container.appendChild(node);
+        }
+
+        function saveProgress() {
+            localStorage.setItem('familyTree', JSON.stringify(treeData));
+            alert('Progress saved successfully!');
+        }
+
+        function loadProgress() {
+            const savedData = localStorage.getItem('familyTree');
+            if (savedData) {
+                treeData = JSON.parse(savedData);
+                const container = document.getElementById('treeContainer');
+                container.innerHTML = '';
+                treeData.forEach(member => {
+                    const node = document.createElement('div');
+                    node.className = 'tree-node';
+                    node.innerHTML = `
+                        <img src="${member.gender === 'male' ? 'https://via.placeholder.com/50/007bff/ffffff?text=B' : 'https://via.placeholder.com/50/ff69b4/ffffff?text=G'}" alt="${member.gender}">
+                        <p>Member ${member.id}</p>
+                    `;
+                    container.appendChild(node);
+                });
+            }
+        }
+
+        function downloadTree() {
+            const blob = new Blob([JSON.stringify(treeData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'family_tree.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Load saved progress on page load
+        window.onload = loadProgress;
+    </script>
+</body>
+</html>
