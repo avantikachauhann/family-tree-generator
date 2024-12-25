@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f1ea;
+            color: #5e412f;
+        }
+        header {
+            background-color: #8b4513;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .tree-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .generation {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .tree-node {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+            position: relative;
+        }
+        .tree-node img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #8b4513;
+            background-color: white;
+        }
+        .relationship-line {
+            width: 2px;
+            height: 50px;
+            background-color: #8b4513;
+            position: absolute;
+            left: 50%;
+            top: 60px;
+        }
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #8b4513;
+            color: white;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        .button:hover {
+            background-color: #5e412f;
+        }
+        .icon-selection {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .icon-selection img {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 50%;
+        }
+        .icon-selection img.selected {
+            border-color: #8b4513;
+        }
+        select {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            border: 1px solid #8b4513;
+            border-radius: 5px;
+            background-color: #f4f1ea;
+            color: #5e412f;
+        }
