@@ -17,6 +17,10 @@
             flex-direction: column;
             align-items: center;
         }
+        .generation {
+            margin: 20px 0;
+            text-align: center;
+        }
         .tree-node {
             display: inline-block;
             margin: 10px;
@@ -27,11 +31,6 @@
             height: 50px;
             border-radius: 50%;
             border: 2px solid #ccc;
-        }
-        .tree-connection {
-            width: 2px;
-            background-color: #000;
-            position: absolute;
         }
         .controls {
             margin-bottom: 20px;
@@ -53,6 +52,7 @@
 </head>
 <body>
     <div class="controls">
+        <button class="button" onclick="addGeneration()">Add Generation</button>
         <button class="button" onclick="addMember('male')">Add Male</button>
         <button class="button" onclick="addMember('female')">Add Female</button>
         <button class="button" onclick="saveProgress()">Save Progress</button>
@@ -66,21 +66,50 @@
     <script>
         let treeData = [];
 
-        function addMember(gender) {
+        function addGeneration() {
             const container = document.getElementById('treeContainer');
-            const member = {
-                id: treeData.length + 1,
-                gender: gender
+            const generationId = `generation-${treeData.length + 1}`;
+            const generation = {
+                id: generationId,
+                members: []
             };
-            treeData.push(member);
+            treeData.push(generation);
 
+            const generationDiv = document.createElement('div');
+            generationDiv.className = 'generation';
+            generationDiv.id = generationId;
+            generationDiv.innerHTML = `<h3>Generation ${treeData.length}</h3>`;
+            container.appendChild(generationDiv);
+        }
+
+        function addMember(gender) {
+            const lastGeneration = treeData[treeData.length - 1];
+            if (!lastGeneration) {
+                alert('Please add a generation first.');
+                return;
+            }
+
+            const name = prompt('Enter the name of the person:');
+            if (!name) {
+                alert('Name is required.');
+                return;
+            }
+
+            const member = {
+                id: lastGeneration.members.length + 1,
+                gender: gender,
+                name: name
+            };
+            lastGeneration.members.push(member);
+
+            const generationDiv = document.getElementById(lastGeneration.id);
             const node = document.createElement('div');
             node.className = 'tree-node';
             node.innerHTML = `
                 <img src="${gender === 'male' ? 'https://via.placeholder.com/50/007bff/ffffff?text=B' : 'https://via.placeholder.com/50/ff69b4/ffffff?text=G'}" alt="${gender}">
-                <p>Member ${member.id}</p>
+                <p>${name}</p>
             `;
-            container.appendChild(node);
+            generationDiv.appendChild(node);
         }
 
         function saveProgress() {
@@ -94,14 +123,21 @@
                 treeData = JSON.parse(savedData);
                 const container = document.getElementById('treeContainer');
                 container.innerHTML = '';
-                treeData.forEach(member => {
-                    const node = document.createElement('div');
-                    node.className = 'tree-node';
-                    node.innerHTML = `
-                        <img src="${member.gender === 'male' ? 'https://via.placeholder.com/50/007bff/ffffff?text=B' : 'https://via.placeholder.com/50/ff69b4/ffffff?text=G'}" alt="${member.gender}">
-                        <p>Member ${member.id}</p>
-                    `;
-                    container.appendChild(node);
+                treeData.forEach(generation => {
+                    const generationDiv = document.createElement('div');
+                    generationDiv.className = 'generation';
+                    generationDiv.id = generation.id;
+                    generationDiv.innerHTML = `<h3>${generation.id.replace('generation-', 'Generation ')}</h3>`;
+                    generation.members.forEach(member => {
+                        const node = document.createElement('div');
+                        node.className = 'tree-node';
+                        node.innerHTML = `
+                            <img src="${member.gender === 'male' ? 'https://via.placeholder.com/50/007bff/ffffff?text=B' : 'https://via.placeholder.com/50/ff69b4/ffffff?text=G'}" alt="${member.gender}">
+                            <p>${member.name}</p>
+                        `;
+                        generationDiv.appendChild(node);
+                    });
+                    container.appendChild(generationDiv);
                 });
             }
         }
