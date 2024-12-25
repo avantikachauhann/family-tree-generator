@@ -5,11 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Tree Generator</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            background-color: #f4f1ea;
+            color: #5e412f;
+        }
+        header {
+            background-color: #8b4513;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
         }
         .tree-container {
             padding: 20px;
@@ -25,15 +38,26 @@
             display: inline-block;
             margin: 10px;
             text-align: center;
+            position: relative;
         }
         .tree-node img {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 2px solid #ccc;
+            border: 3px solid #8b4513;
+            background-color: white;
+        }
+        .relationship-line {
+            width: 2px;
+            height: 50px;
+            background-color: #8b4513;
+            position: absolute;
+            left: 50%;
+            top: 60px;
         }
         .controls {
             margin-bottom: 20px;
+            text-align: center;
         }
         .button {
             margin: 5px;
@@ -41,20 +65,52 @@
             font-size: 16px;
             cursor: pointer;
             border: none;
-            background-color: #007bff;
+            background-color: #8b4513;
             color: white;
             border-radius: 5px;
+            font-weight: 600;
         }
         .button:hover {
-            background-color: #0056b3;
+            background-color: #5e412f;
+        }
+        .icon-selection {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .icon-selection img {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 50%;
+        }
+        .icon-selection img.selected {
+            border-color: #8b4513;
+        }
+        select {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            border: 1px solid #8b4513;
+            border-radius: 5px;
+            background-color: #f4f1ea;
+            color: #5e412f;
         }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Family Tree Generator</h1>
+        <p>Create, visualize, and download your family tree with ease.</p>
+    </header>
+
     <div class="controls">
         <button class="button" onclick="addGeneration()">Add Generation</button>
-        <button class="button" onclick="addMember('male')">Add Male</button>
-        <button class="button" onclick="addMember('female')">Add Female</button>
+        <button class="button" onclick="addMember()">Add Member</button>
+        <button class="button" onclick="addRelationship()">Add Relationship</button>
         <button class="button" onclick="saveProgress()">Save Progress</button>
         <button class="button" onclick="downloadTree()">Download Tree</button>
     </div>
@@ -64,7 +120,21 @@
     </div>
 
     <script>
+        const iconOptions = [
+            'https://www.pinclipart.com/picdir/big/13-136730_-soloveika-grandfather-clipart-png.png',
+            'https://png.pngtree.com/png-clipart/20231008/ourmid/pngtree-happy-grandmother-cute-image-png-image_10196472.png',
+            'https://www.pngmart.com/files/22/Father-PNG-Image.png',
+            'https://cdn0.iconfinder.com/data/icons/mother-s-day-bzzricon-filled-lines/512/01_Mother-1024.png',
+            'https://cdn-icons-png.flaticon.com/512/4842/4842291.png',
+            'https://cdn-icons-png.flaticon.com/256/7223/7223727.png',
+            'https://cdn-icons-png.flaticon.com/512/145/145867.png',
+            'https://cdn-icons-png.flaticon.com/512/186/186037.png',
+            'https://www.pngrepo.com/png/110198/512/boy.png',
+            'https://cdn-icons-png.flaticon.com/512/163/163824.png'
+        ];
+
         let treeData = [];
+        let relationships = [];
 
         function addGeneration() {
             const container = document.getElementById('treeContainer');
@@ -82,7 +152,26 @@
             container.appendChild(generationDiv);
         }
 
-        function addMember(gender) {
+        function selectIcon(callback) {
+            const selectionDiv = document.createElement('div');
+            selectionDiv.className = 'icon-selection';
+            document.body.appendChild(selectionDiv);
+
+            iconOptions.forEach((icon, index) => {
+                const img = document.createElement('img');
+                img.src = icon;
+                img.alt = `Icon ${index + 1}`;
+                img.onclick = () => {
+                    document.querySelectorAll('.icon-selection img').forEach(img => img.classList.remove('selected'));
+                    img.classList.add('selected');
+                    callback(icon);
+                    document.body.removeChild(selectionDiv);
+                };
+                selectionDiv.appendChild(img);
+            });
+        }
+
+        function addMember() {
             const lastGeneration = treeData[treeData.length - 1];
             if (!lastGeneration) {
                 alert('Please add a generation first.');
@@ -95,32 +184,107 @@
                 return;
             }
 
-            const member = {
-                id: lastGeneration.members.length + 1,
-                gender: gender,
-                name: name
-            };
-            lastGeneration.members.push(member);
+            selectIcon((imageUrl) => {
+                const member = {
+                    id: `${lastGeneration.id}-member-${lastGeneration.members.length + 1}`,
+                    name: name,
+                    imageUrl: imageUrl
+                };
+                lastGeneration.members.push(member);
 
-            const generationDiv = document.getElementById(lastGeneration.id);
-            const node = document.createElement('div');
-            node.className = 'tree-node';
-            node.innerHTML = `
-                <img src="${gender === 'male' ? 'https://via.placeholder.com/50/007bff/ffffff?text=B' : 'https://via.placeholder.com/50/ff69b4/ffffff?text=G'}" alt="${gender}">
-                <p>${name}</p>
-            `;
-            generationDiv.appendChild(node);
+                const generationDiv = document.getElementById(lastGeneration.id);
+                const node = document.createElement('div');
+                node.className = 'tree-node';
+                node.id = member.id;
+                node.innerHTML = `
+                    <img src="${imageUrl}" alt="${name}">
+                    <p>${name}</p>
+                `;
+                generationDiv.appendChild(node);
+            });
+        }
+
+        function addRelationship() {
+            const memberDropdown1 = createDropdown('Select the first member:', 'member1Dropdown');
+            const memberDropdown2 = createDropdown('Select the second member:', 'member2Dropdown');
+
+            const members = treeData.flatMap(generation => generation.members);
+            members.forEach(member => {
+                const option1 = document.createElement('option');
+                option1.value = member.id;
+                option1.textContent = member.name;
+                memberDropdown1.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = member.id;
+                option2.textContent = member.name;
+                memberDropdown2.appendChild(option2);
+            });
+
+            const submitButton = document.createElement('button');
+            submitButton.textContent = 'Add Relationship';
+            submitButton.className = 'button';
+            submitButton.onclick = () => {
+                const member1Id = memberDropdown1.value;
+                const member2Id = memberDropdown2.value;
+
+                if (!member1Id || !member2Id) {
+                    alert('Please select both members.');
+                    return;
+                }
+
+                const member1 = document.getElementById(member1Id);
+                const member2 = document.getElementById(member2Id);
+
+                if (!member1 || !member2) {
+                    alert('Invalid member IDs provided.');
+                    return;
+                }
+
+                relationships.push({ member1Id, member2Id });
+
+                const line = document.createElement('div');
+                line.className = 'relationship-line';
+                member1.appendChild(line);
+
+                document.body.removeChild(memberDropdown1.parentElement);
+            };
+
+            const container = document.createElement('div');
+            container.appendChild(memberDropdown1);
+            container.appendChild(memberDropdown2);
+            container.appendChild(submitButton);
+            document.body.appendChild(container);
+        }
+
+        function createDropdown(labelText, id) {
+            const label = document.createElement('label');
+            label.textContent = labelText;
+            label.style.display = 'block';
+
+            const select = document.createElement('select');
+            select.id = id;
+
+            const container = document.createElement('div');
+            container.style.margin = '10px';
+            container.appendChild(label);
+            container.appendChild(select);
+
+            return select;
         }
 
         function saveProgress() {
-            localStorage.setItem('familyTree', JSON.stringify(treeData));
+            localStorage.setItem('familyTree', JSON.stringify({ treeData, relationships }));
             alert('Progress saved successfully!');
         }
 
         function loadProgress() {
             const savedData = localStorage.getItem('familyTree');
             if (savedData) {
-                treeData = JSON.parse(savedData);
+                const parsedData = JSON.parse(savedData);
+                treeData = parsedData.treeData;
+                relationships = parsedData.relationships;
+
                 const container = document.getElementById('treeContainer');
                 container.innerHTML = '';
                 treeData.forEach(generation => {
@@ -131,19 +295,30 @@
                     generation.members.forEach(member => {
                         const node = document.createElement('div');
                         node.className = 'tree-node';
+                        node.id = member.id;
                         node.innerHTML = `
-                            <img src="${member.gender === 'male' ? 'https://via.placeholder.com/50/007bff/ffffff?text=B' : 'https://via.placeholder.com/50/ff69b4/ffffff?text=G'}" alt="${member.gender}">
+                            <img src="${member.imageUrl}" alt="${member.name}">
                             <p>${member.name}</p>
                         `;
                         generationDiv.appendChild(node);
                     });
                     container.appendChild(generationDiv);
                 });
+
+                relationships.forEach(({ member1Id, member2Id }) => {
+                    const member1 = document.getElementById(member1Id);
+                    const member2 = document.getElementById(member2Id);
+                    if (member1 && member2) {
+                        const line = document.createElement('div');
+                        line.className = 'relationship-line';
+                        member1.appendChild(line);
+                    }
+                });
             }
         }
 
         function downloadTree() {
-            const blob = new Blob([JSON.stringify(treeData, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify({ treeData, relationships }, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
